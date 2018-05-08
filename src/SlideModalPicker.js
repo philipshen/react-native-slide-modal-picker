@@ -1,16 +1,20 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { DatePickerIOS, Picker, Dimensions, StyleSheet, Animated, Easing } from 'react-native'
+import { DatePickerIOS, Picker, Dimensions, StyleSheet, Animated, Easing, Platform, DatePickerAndroid, TimePickerAndroid } from 'react-native'
 
 export default class ModalPicker extends Component {
 
     _containerStyle;
     _pickerTranslation = new Animated.Value(0);
     state;
+    _isIOS = Platform.OS === 'ios';
 
     // Initialize
     constructor(props) {
         super(props);
+
+        /// Android has a far different implementation
+        if (!this._isIOS) { return; }
 
         this.state = {
             pickerHidden: true
@@ -34,6 +38,8 @@ export default class ModalPicker extends Component {
             inputRange: [0, 1],
             outputRange: [0, -200],
         });
+
+        if (!this._isIOS) { return null }
 
         return (
             <Animated.View
@@ -83,7 +89,8 @@ export default class ModalPicker extends Component {
     }
 
     // Control
-    togglePicker() {
+    togglePickerIOS() {
+        if (!this._isIOS) { return; }
         const { pickerHidden } = this.state;
 
         if (pickerHidden) {
@@ -96,6 +103,14 @@ export default class ModalPicker extends Component {
     }
 
     showPicker() {
+        if (this._isIOS) {
+            this._showPickerIOS()
+        } else {
+            this._showPickerAndroid()
+        }
+    }
+
+    _showPickerIOS() {
         const { pickerHidden } = this.state;
         if (pickerHidden === false) { return }
         this.setState({ pickerHidden: false });
@@ -105,12 +120,95 @@ export default class ModalPicker extends Component {
                 toValue: 1,
                 duration: 400,
                 useNativeDriver: true,
-                // easing: Easing.out(Easing.linear)
             }
         ).start()
     }
 
+    _showPickerAndroid() {
+        switch(this.props.type) {
+            case "date":
+                _ = this._showDatePickerAndroid();
+                break;
+            case "time":
+                _ = this._showTimePickerAndroid();
+                break;
+            case "datetime":
+                _ = this._showDateTimePickerAndroid();
+                break;
+            default:
+                break;
+        }
+    }
+
+    async _showDatePickerAndroid() {
+        try {
+            const { action, year, month, day } = await DatePickerAndroid.open({
+                mode: "default",
+                date: this.props.pickerValue
+            });
+
+            if (action !== DatePickerAndroid.dismissedAction) {
+                const chosenDate = new Date(year, month, day);
+                this.props.onValueChange(chosenDate);
+            }
+        }
+        catch({ code, message }) {
+            console.warn(`${code}: Cannot open the date picker ${message}`);
+        }
+    }
+
+    async _showTimePickerAndroid() {
+        try {
+            const now = this.props.pickerValue;
+            const { action, hour, minute } = await TimePickerAndroid.open({
+                hour: now.getHours(),
+                minute: now.getMinutes(),
+                is24Hour: false
+            });
+
+            if (action !== TimePickerAndroid.dismissedAction) {
+                const chosenDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+                this.props.onValueChange(chosenDate);
+            }
+        }
+        catch ({ code, message }) {
+            console.warn(`${code}: Cannot open the time picker ${message}`);
+        }
+    }
+
+    async _showDateTimePickerAndroid() {
+        try {
+            const now = this.props.pickerValue;
+            const dateResults = await DatePickerAndroid.open({
+                mode: "default",
+                date: now
+            });
+
+            if (dateResults.action === DatePickerAndroid.dismissedAction) { return; }
+
+            const timeResults = await TimePickerAndroid.open({
+                hour: now.getHours(),
+                minute: now.getMinutes(),
+                is24Hour: false
+            });
+
+            if (timeResults.action === TimePickerAndroid.dismissedAction) { return; }
+
+            const { year, month, day } = dateResults;
+            const { hour, minute } = timeResults;
+            const chosenDate = new Date(year, month, day, hour, minute);
+
+            this.props.onValueChange(chosenDate)
+        }
+        catch ({ code, message }) {
+            console.warn(`${code}: Cannot open date/time picker ${message}`)
+        }
+    }
+
+    // Android picker is a dialog that only dismisses itself
     hidePicker() {
+        if (!this._isIOS) { return }
+
         const { pickerHidden } = this.state;
         if (pickerHidden === true) { return }
         this.setState({ pickerHidden: true });

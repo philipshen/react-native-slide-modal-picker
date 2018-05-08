@@ -35,13 +35,19 @@ export default class App extends Component<undefined> {
                     ref={ref => (this._regPicker = ref)}
                     pickerItems={["给我钱", "牛肉饭", "孔夫子说"]}
                     pickerValue={this.state.regValue}
-                    onValueChange={(val) => this.setState({regValue: val})}
+                    onValueChange={(val) => {
+                        this.setState({regValue: val});
+                        console.log(val);
+                    }}
                 />
                 <Picker
                     type={"date"}
                     ref={ref => (this._datePicker = ref)}
                     pickerValue={this.state.dateValue}
-                    onValueChange={(val) => this.setState({dateValue: val})}
+                    onValueChange={(val) => {
+                        this.setState({dateValue: val});
+                        console.log(val);
+                    }}
                     style={{
                         backgroundColor: "blue"
                     }}
@@ -50,7 +56,10 @@ export default class App extends Component<undefined> {
                     type={"time"}
                     ref={ref => (this._timePicker = ref)}
                     pickerValue={this.state.timeValue}
-                    onValueChange={(val) => this.setState({timeValue: val})}
+                    onValueChange={(val) => {
+                        this.setState({timeValue: val});
+                        console.log(val);
+                    }}
                     style={{
                         borderTopWidth: 0.5,
                         borderColor: "#707070"
@@ -59,7 +68,10 @@ export default class App extends Component<undefined> {
                 <Picker
                     type={"datetime"}
                     pickerValue={this.state.datetimeValue}
-                    onValueChange={(val) => this.setState({datetimeValue: val})}
+                    onValueChange={(val) => {
+                        this.setState({datetimeValue: val});
+                        console.log(val);
+                    }}
                     ref={ref => (this._datetimePicker = ref)}
                 />
             </View>
