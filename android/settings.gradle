@@ -1,0 +1,3 @@
+rootProject.name = 'SlideModalPicker'
+
+include ':app'
