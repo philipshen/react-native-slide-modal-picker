@@ -19,7 +19,14 @@ export default class ModalPicker extends Component {
         if (!this._isIOS) { return; }
 
         // Initial value
-        if (props.initialValue === undefined)
+        let currentValue;
+        if (props.initialValue === undefined) {
+            if (props.type === "picker") {
+                currentValue = props.pickerItems[0];
+            } else {
+                currentValue = new Date()
+            }
+        }
         this.state = {
             pickerHidden: true,
             currentValue: props.initialValue
