@@ -29,7 +29,7 @@ export default class ModalPicker extends Component {
         }
         this.state = {
             pickerHidden: true,
-            currentValue: props.initialValue
+            currentValue: currentValue
         };
 
         // Initial value of the picker (iOS only)
