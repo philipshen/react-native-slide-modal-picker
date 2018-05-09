@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { DatePickerIOS, Picker, Dimensions, StyleSheet, Animated, Easing, Platform, DatePickerAndroid, TimePickerAndroid } from 'react-native'
+import { DatePickerIOS, Picker, DatePickerAndroid, TimePickerAndroid,
+         Dimensions, StyleSheet, Animated, Easing, Platform,
+         View, Button, Text } from 'react-native'
 
 export default class ModalPicker extends Component {
 
@@ -16,9 +18,14 @@ export default class ModalPicker extends Component {
         /// Android has a far different implementation
         if (!this._isIOS) { return; }
 
+        // Initial value
+        if (props.initialValue === undefined)
         this.state = {
-            pickerHidden: true
+            pickerHidden: true,
+            currentValue: props.initialValue
         };
+
+        // Initial value of the picker (iOS only)
 
         // Dynamic styles, so we set em here
         let screenHeight = Dimensions.get('window').height;
@@ -26,8 +33,8 @@ export default class ModalPicker extends Component {
         this._containerStyle = {
             marginTop: screenHeight,
             width: screenWidth,
-            height: 200,
-            position: "absolute"
+            height: 250,
+            position: "absolute",
         }
     }
 
@@ -36,7 +43,7 @@ export default class ModalPicker extends Component {
     render() {
         const translation = this._pickerTranslation.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -200],
+            outputRange: [0, -250],
         });
 
         if (!this._isIOS) { return null }
@@ -45,13 +52,30 @@ export default class ModalPicker extends Component {
             <Animated.View
                 style={[{transform: [{translateY: translation}]}, this._containerStyle]}
             >
-                {this._renderAppropriatePicker()}
+                <View style={[styles.pickerHeader, this.props.headerStyle]}>
+                    <Button
+                        title={"Cancel"}
+                        onPress={() => {
+                            this.hidePicker()
+                        }}
+                    />
+                    <Text style={this.props.titleStyle}>{this.props.title}</Text>
+                    <Button
+                        title={"Done"}
+                        onPress={() => {
+                            this.hidePicker();
+                            this.props.onValueChange(this.state.currentValue)
+                        }}
+                    />
+                </View>
+                {this._renderIOSPicker()}
             </Animated.View>
         )
     }
 
-    _renderAppropriatePicker() {
-        const { pickerValue, type, onValueChange, style } = this.props;
+    _renderIOSPicker() {
+        const { type, style } = this.props;
+        const { currentValue } = this.state;
 
         // PLATFORM-INDEPENDENT
         if (type === 'picker') {
@@ -59,9 +83,11 @@ export default class ModalPicker extends Component {
 
             return (
                 <Picker
-                    selectedValue={pickerValue}
+                    selectedValue={currentValue}
                     style={[styles.picker, style]}
-                    onValueChange={onValueChange}
+                    onValueChange={(val) => {
+                        this.setState({currentValue: val})
+                    }}
                 >
                     {pickerItems.map((val, key) => {
                         return (
@@ -76,8 +102,10 @@ export default class ModalPicker extends Component {
         return (
             <DatePickerIOS
                 style={[styles.picker, style]}
-                date={pickerValue}
-                onDateChange={onValueChange}
+                date={currentValue}
+                onDateChange={(date) => {
+                    this.setState({currentValue: date})
+                }}
                 mode={type}
                 minimumDate={minimumDate}
                 maximumDate={maximumDate}
@@ -89,7 +117,7 @@ export default class ModalPicker extends Component {
     }
 
     // Control
-    togglePickerIOS() {
+    togglePicker() {
         if (!this._isIOS) { return; }
         const { pickerHidden } = this.state;
 
@@ -110,6 +138,26 @@ export default class ModalPicker extends Component {
         }
     }
 
+    // Android picker is a dialog that only dismisses itself
+    hidePicker() {
+        if (!this._isIOS) { return }
+
+        const { pickerHidden } = this.state;
+        if (pickerHidden === true) { return }
+        this.setState({ pickerHidden: true });
+
+        Animated.timing(
+            this._pickerTranslation,
+            {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+                easing: Easing.quad
+            }
+        ).start()
+    }
+
+    // UTILITY
     _showPickerIOS() {
         const { pickerHidden } = this.state;
         if (pickerHidden === false) { return }
@@ -127,13 +175,13 @@ export default class ModalPicker extends Component {
     _showPickerAndroid() {
         switch(this.props.type) {
             case "date":
-                _ = this._showDatePickerAndroid();
+                this._showDatePickerAndroid();
                 break;
             case "time":
-                _ = this._showTimePickerAndroid();
+                this._showTimePickerAndroid();
                 break;
             case "datetime":
-                _ = this._showDateTimePickerAndroid();
+                this._showDateTimePickerAndroid();
                 break;
             default:
                 break;
@@ -144,7 +192,7 @@ export default class ModalPicker extends Component {
         try {
             const { action, year, month, day } = await DatePickerAndroid.open({
                 mode: "default",
-                date: this.props.pickerValue
+                date: this.props.initialValue
             });
 
             if (action !== DatePickerAndroid.dismissedAction) {
@@ -159,7 +207,7 @@ export default class ModalPicker extends Component {
 
     async _showTimePickerAndroid() {
         try {
-            const now = this.props.pickerValue;
+            const now = this.props.initialValue;
             const { action, hour, minute } = await TimePickerAndroid.open({
                 hour: now.getHours(),
                 minute: now.getMinutes(),
@@ -178,7 +226,7 @@ export default class ModalPicker extends Component {
 
     async _showDateTimePickerAndroid() {
         try {
-            const now = this.props.pickerValue;
+            const now = this.props.initialValue;
             const dateResults = await DatePickerAndroid.open({
                 mode: "default",
                 date: now
@@ -205,37 +253,23 @@ export default class ModalPicker extends Component {
         }
     }
 
-    // Android picker is a dialog that only dismisses itself
-    hidePicker() {
-        if (!this._isIOS) { return }
-
-        const { pickerHidden } = this.state;
-        if (pickerHidden === true) { return }
-        this.setState({ pickerHidden: true });
-
-        Animated.timing(
-            this._pickerTranslation,
-            {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-                easing: Easing.quad
-            }
-        ).start()
-    }
-
 }
 
 ModalPicker.propTypes = {
     type: PropTypes.oneOf(["time", "date", "datetime", "picker"]).isRequired,
 
-    pickerValue: PropTypes.oneOfType([
+    initialValue: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.date
     ]),
     style: PropTypes.object,
 
     onValueChange: PropTypes.func,
+
+    // IOS title & header
+    headerStyle: PropTypes.object,
+    title: PropTypes.string,
+    titleStyle: PropTypes.object,
 
     // For the date/time/datetime
     maximumDate: PropTypes.date,
@@ -250,7 +284,12 @@ ModalPicker.propTypes = {
 
 const styles = StyleSheet.create({
     picker: {
-        height: "100%",
         width: "100%"
+    },
+    pickerHeader: {
+        height: 40,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
     }
 });

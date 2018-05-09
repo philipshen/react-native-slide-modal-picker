@@ -1,21 +1,28 @@
 {
   "name": "react-native-slide-modal-picker",
-  "author": "philipshen",
-  "description": "A (iOS only, right now) picker that slides up from the bottom of the screen",
-  "version": "0.0.2",
+  "author": "philipshen <philipshen13@gmail.com>",
+  "description": "A convenient cross-platform picker component",
+  "version": "0.0.6",
+  "license": "MIT",
+  "main": "./src/SlideModalPicker.js",
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest"
   },
-  "dependencies": {
-    "react": "16.3.1",
-    "react-native": "0.55.3"
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "babel-jest": "22.4.3",
     "babel-preset-react-native": "4.0.0",
     "jest": "22.4.3",
-    "react-test-renderer": "16.3.1"
+    "react-test-renderer": "16.3.1",
+    "react": "16.3.1",
+    "react-native": "0.55.3"
   },
   "jest": {
     "preset": "react-native"

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 
-import Picker from './src/SlideModalPicker'
+import Picker from '../src/SlideModalPicker'
 
 export default class App extends Component<undefined> {
 
@@ -22,13 +22,15 @@ export default class App extends Component<undefined> {
     }
 
     render() {
+        const { regValue, dateValue, timeValue, datetimeValue } = this.state;
+
         return (
             <View>
                 <View style={styles.buttonContainer}>
-                    <Button style={styles.button} title={"Regular Picker"} onPress={() => this._showPicker(this._regPicker)}/>
-                    <Button style={styles.button} title={"Date Picker"} onPress={() => this._showPicker(this._datePicker)}/>
-                    <Button style={styles.button} title={"Time Picker"} onPress={() => this._showPicker(this._timePicker)}/>
-                    <Button style={styles.button} title={"Datetime Picker"} onPress={() => this._showPicker(this._datetimePicker)}/>
+                    <Button style={styles.button} title={regValue} onPress={() => this._showPicker(this._regPicker)}/>
+                    <Button style={styles.button} title={this._datestring(dateValue)} onPress={() => this._showPicker(this._datePicker)}/>
+                    <Button style={styles.button} title={this._datestring(timeValue)} onPress={() => this._showPicker(this._timePicker)}/>
+                    <Button style={styles.button} title={this._datestring(datetimeValue)} onPress={() => this._showPicker(this._datetimePicker)}/>
                 </View>
                 <Picker
                     type={"picker"}
@@ -37,8 +39,8 @@ export default class App extends Component<undefined> {
                     pickerValue={this.state.regValue}
                     onValueChange={(val) => {
                         this.setState({regValue: val});
-                        console.log(val);
                     }}
+                    headerStyle={{backgroundColor: "red"}}
                 />
                 <Picker
                     type={"date"}
@@ -46,11 +48,13 @@ export default class App extends Component<undefined> {
                     pickerValue={this.state.dateValue}
                     onValueChange={(val) => {
                         this.setState({dateValue: val});
-                        console.log(val);
                     }}
                     style={{
                         backgroundColor: "blue"
                     }}
+                    title={"Whoopti Scoop"}
+                    titleStyle={{fontSize: 19}}
+                    headerStyle={{borderTopWidth: 0.5}}
                 />
                 <Picker
                     type={"time"}
@@ -58,7 +62,6 @@ export default class App extends Component<undefined> {
                     pickerValue={this.state.timeValue}
                     onValueChange={(val) => {
                         this.setState({timeValue: val});
-                        console.log(val);
                     }}
                     style={{
                         borderTopWidth: 0.5,
@@ -70,7 +73,6 @@ export default class App extends Component<undefined> {
                     pickerValue={this.state.datetimeValue}
                     onValueChange={(val) => {
                         this.setState({datetimeValue: val});
-                        console.log(val);
                     }}
                     ref={ref => (this._datetimePicker = ref)}
                 />
@@ -86,9 +88,16 @@ export default class App extends Component<undefined> {
     }
 
     _showPicker(picker) {
-        this. _hidePickers()
+        this._hidePickers();
         picker.showPicker()
     }
+
+    _datestring(date) {
+        let minutes = date.getMinutes() + '';
+        minutes = minutes.length == 2 ? minutes : new Array(2 - minutes.length + 1).join('0') + minutes;
+        return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}, ${date.getHours()}:${minutes}`
+    }
+
 }
 
 const styles = StyleSheet.create({
