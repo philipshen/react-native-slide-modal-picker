@@ -78,25 +78,6 @@ By default, either the first item in `pickerItems` or the current date (dependin
 
 **onValueChange**: `(val) => void` <br />When a new date is selected.
 
-#### IOS Only
-**style**: `object` <br />Style of the actual picker
-
-**title**: `string`
-
-The following are all the same as [DatePickerIOS](https://facebook.github.io/react-native/docs/datepickerios.html):
-
-**titleStyle**: `object`
-
-**maximumDate**: `Date`
-
-**minimumDate**: `Date`
-
-**minuteInterval**: `1|2|3|4|5|6|10|12|15|20|30`
-
-**timeZoneOffsetInMinutes**: `number`
-
-**locale**: `string`
-
 **padding**: `number` 
 <br /> 
 By default, the iOS date picker's top margin is equal to the height of the screen. In many cases, however, its superview will not be the size of the entire screen; in these cases, this prop can be set to "push" the picker a little higher. For example, if you have a react-navigation header:
@@ -109,5 +90,23 @@ By default, the iOS date picker's top margin is equal to the height of the scree
         ...
         padding={Header.HEIGHT}
     >
-    
+
+#### IOS Only
+**style**: `object` <br />Style of the actual picker
+
+**title**: `string`
+
+**titleStyle**: `object`
+
+#### The following are all the same as [DatePickerIOS](https://facebook.github.io/react-native/docs/datepickerios.html):
+
+**maximumDate**: `Date`
+
+**minimumDate**: `Date`
+
+**minuteInterval**: `1|2|3|4|5|6|10|12|15|20|30`
+
+**timeZoneOffsetInMinutes**: `number`
+
+**locale**: `string`
 
