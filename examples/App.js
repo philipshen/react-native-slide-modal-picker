@@ -67,6 +67,7 @@ export default class App extends Component<undefined> {
                         borderTopWidth: 0.5,
                         borderColor: "#707070"
                     }}
+                    padding={-40}
                 />
                 <Picker
                     type={"datetime"}
@@ -75,6 +76,7 @@ export default class App extends Component<undefined> {
                         this.setState({datetimeValue: val});
                     }}
                     ref={ref => (this._datetimePicker = ref)}
+                    padding={20}
                 />
             </View>
         );

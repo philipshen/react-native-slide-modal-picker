@@ -32,13 +32,14 @@ export default class ModalPicker extends Component {
             currentValue: currentValue
         };
 
-        // Initial value of the picker (iOS only)
+        // Padding
+        let padding = props.padding === undefined ? 0 : props.padding;
 
         // Dynamic styles, so we set em here
         let screenHeight = Dimensions.get('window').height;
         let screenWidth = Dimensions.get('window').width;
         this._containerStyle = {
-            marginTop: screenHeight,
+            marginTop: screenHeight - padding,
             width: screenWidth,
             height: 250,
             position: "absolute",
@@ -277,6 +278,7 @@ ModalPicker.propTypes = {
     headerStyle: PropTypes.object,
     title: PropTypes.string,
     titleStyle: PropTypes.object,
+    padding: PropTypes.number,
 
     // For the date/time/datetime
     maximumDate: PropTypes.date,

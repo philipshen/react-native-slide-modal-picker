@@ -64,13 +64,17 @@ That's all you need to implement it.
 
 ### Props
 
-The only required prop is "type"; by default, the initial picker value will be set to the current date (for date/time/datetime picker) or the first picker element.
-
-**type**: `"time"|"date"|"datetime"|picker` <br />The type of picker. Regular "picker" doesn't support Android.
+**type**: `"time"|"date"|"datetime"|picker` 
+<br />
+The type of picker, and the only required prop. Regular "picker" doesn't support Android.
 
 **pickerItems**: `string[]`
+<br />
+For normal pickers only
 
 **initialValue**: `string` for "picker", else `Date`
+<br />
+By default, either the first item in `pickerItems` or the current date (depending on the `type`) 
 
 **onValueChange**: `(val) => void` <br />When a new date is selected.
 
@@ -92,4 +96,18 @@ The following are all the same as [DatePickerIOS](https://facebook.github.io/rea
 **timeZoneOffsetInMinutes**: `number`
 
 **locale**: `string`
+
+**padding**: `number` 
+<br /> 
+By default, the iOS date picker's top margin is equal to the height of the screen. In many cases, however, its superview will not be the size of the entire screen; in these cases, this prop can be set to "push" the picker a little higher. For example, if you have a react-navigation header:
+<br />
+
+    import { Header } from 'react-navigation'
+    import Picker from 'react-native-slide-modal-picker'
+    ...
+    <Picker
+        ...
+        padding={Header.HEIGHT}
+    >
+    
 
