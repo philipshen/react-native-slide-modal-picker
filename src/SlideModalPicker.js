@@ -1,44 +1,48 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { DatePickerIOS, Picker, DatePickerAndroid, TimePickerAndroid,
-         Dimensions, StyleSheet, Animated, Easing, Platform,
-         View, Button, Text } from 'react-native'
+         Dimensions, StyleSheet, Animated, Platform,
+         View, Button, Text, Modal, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 
 export default class ModalPicker extends Component {
 
-    _containerStyle;
-    _pickerTranslation = new Animated.Value(0);
-    state;
     _isIOS = Platform.OS === 'ios';
+    _isModalPicker; // If IOS or Android regular picker, we make a custom modal for it
+
+    // IOS only, for the sliding animation
+    _slidePickerStyle;
+    _pickerTranslation = new Animated.Value(0);
 
     // Initialize
     constructor(props) {
         super(props);
 
-        /// Android has a far different implementation
-        if (!this._isIOS) { return; }
+        this._isModalPicker = this._isIOS || props.type === "picker";
 
         // Initial value
-        let currentValue;
+        let initialValue;
         if (props.initialValue === undefined) {
             if (props.type === "picker") {
-                currentValue = props.pickerItems[0];
+                initialValue = props.pickerItems[0];
             } else {
-                currentValue = new Date()
+                initialValue = new Date()
             }
         }
         this.state = {
-            pickerHidden: true,
-            currentValue: currentValue
+            pickerVisible: false,
+            currentValue: initialValue,
+            // The value that will be displayed when the modal is opened
+            initialValue: initialValue,
         };
 
-        // Padding
-        let padding = props.padding === undefined ? 0 : props.padding;
+        // What follows is all IOS-specific
+        if (!this._isIOS) { return; }
 
-        // Dynamic styles, so we set em here
-        let screenHeight = Dimensions.get('window').height;
-        let screenWidth = Dimensions.get('window').width;
-        this._containerStyle = {
+        // Padding
+        const padding = props.padding === undefined ? 0 : props.padding;
+        const screenHeight = Dimensions.get('window').height;
+        const screenWidth = Dimensions.get('window').width;
+        this._slidePickerStyle = {
             marginTop: screenHeight - padding,
             width: screenWidth,
             height: 250,
@@ -46,53 +50,37 @@ export default class ModalPicker extends Component {
         }
     }
 
-
-    // Render
     render() {
-        const translation = this._pickerTranslation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -250],
-        });
-
-        if (!this._isIOS) { return null }
+        // The android date/time pickers are native dialogs, not custom modals, so we don't render anything for them.
+        if (!this._isModalPicker) { return null }
 
         return (
-            <Animated.View
-                style={[{transform: [{translateY: translation}]}, this._containerStyle]}
+            <Modal
+                visible={this.state.pickerVisible}
+                transparent={true}
+                onRequestClose={() => {}}
             >
-                <View style={[styles.pickerHeader, this.props.headerStyle]}>
-                    <Button
-                        title={"Cancel"}
-                        onPress={() => {
-                            this.hidePicker()
-                        }}
-                    />
-                    <Text style={this.props.titleStyle}>{this.props.title}</Text>
-                    <Button
-                        title={"Done"}
-                        onPress={() => {
-                            this.hidePicker();
-                            this.props.onValueChange(this.state.currentValue)
-                        }}
-                    />
-                </View>
-                {this._renderIOSPicker()}
-            </Animated.View>
+                {this._isIOS === false ?  this._renderAndroidPicker() : this._renderIOSPicker()}
+                <TouchableWithoutFeedback onPress={() => this._hideModalPicker()}>
+                    <View style={styles.modalOverlay}/>
+                </TouchableWithoutFeedback>
+            </Modal>
         )
     }
 
     _renderIOSPicker() {
-        const { type, style } = this.props;
+        const { type } = this.props;
         const { currentValue } = this.state;
 
-        // PLATFORM-INDEPENDENT
+        let pickerContents;
+
         if (type === 'picker') {
             const { pickerItems } = this.props;
 
-            return (
+            pickerContents = (
                 <Picker
                     selectedValue={currentValue}
-                    style={[styles.picker, style]}
+                    style={[styles.picker, this.props.style]}
                     onValueChange={(val) => {
                         this.setState({currentValue: val})
                     }}
@@ -104,80 +92,147 @@ export default class ModalPicker extends Component {
                     })}
                 </Picker>
             )
+        } else {
+            const {minimumDate, maximumDate, locale, timeZoneOffsetInMinutes} = this.props;
+            pickerContents = (
+                <DatePickerIOS
+                    style={[styles.picker, this.props.style]}
+                    date={currentValue}
+                    onDateChange={(date) => {
+                        this.setState({currentValue: date})
+                    }}
+                    mode={type}
+                    minimumDate={minimumDate}
+                    maximumDate={maximumDate}
+                    locale={locale}
+                    timeZoneOffsetInMinutes={timeZoneOffsetInMinutes}
+                />
+            )
         }
 
-        const { minimumDate, maximumDate, locale, timeZoneOffsetInMinutes } = this.props;
+        const translation = this._pickerTranslation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, -250],
+        });
         return (
-            <DatePickerIOS
-                style={[styles.picker, style]}
-                date={currentValue}
-                onDateChange={(date) => {
-                    this.setState({currentValue: date})
-                }}
-                mode={type}
-                minimumDate={minimumDate}
-                maximumDate={maximumDate}
-                locale={locale}
-                timeZoneOffsetInMinutes={timeZoneOffsetInMinutes}
-            />
+            <Animated.View
+                style={[{transform: [{translateY: translation}]}, this._slidePickerStyle]}
+            >
+                <View style={[styles.pickerHeader, this.props.headerStyle]}>
+                    <Button
+                        title={"Cancel"}
+                        onPress={() => {
+                            this._hideModalPicker();
+                            // Reset the current value
+                            this.setState({currentValue: this.state.initialValue});
+                        }}
+                    />
+                    <Text style={this.props.titleStyle}>{this.props.title}</Text>
+                    <Button
+                        title={"Done"}
+                        onPress={() => {
+                            this._hideModalPicker();
+                            // Set the initial value to the selected value
+                            this.setState({initialValue: this.state.currentValue});
+
+                            this.props.onValueChange(this.state.currentValue);
+                        }}
+                    />
+                </View>
+                {pickerContents}
+            </Animated.View>
         )
 
     }
 
+    _renderAndroidPicker() {
+        const { pickerItems } = this.props;
+        const pickerComponents = pickerItems.map((item) => {
+            return (
+                <TouchableOpacity key={item}
+                                  activeOpacity={0.7}
+                                  onPress={() => {
+                                      this.props.onValueChange(item);
+                                      this._hideModalPicker()
+                                  }}
+                >
+                    <View style={[styles.androidPickerCell, this.props.androidPickerCellStyle]}>
+                        <Text style={[this.props.androidPickerCellTextStyle, styles.androidPickerCellText]}>
+                            {item}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            );
+        });
+
+        return (
+            <View style={styles.regPickerAndroid}>
+                {pickerComponents}
+            </View>
+        )
+    }
+
     // Control
     togglePicker() {
-        if (!this._isIOS) { return; }
-        const { pickerHidden } = this.state;
+        if (!this._isModalPicker) { return; }
+        const { pickerVisible } = this.state;
 
-        if (pickerHidden) {
-            this.showPicker()
+        if (pickerVisible) {
+            this._hideModalPicker()
         } else {
-            this.hidePicker()
+            this.showPicker( )
         }
 
-        this.setState({ pickerHidden: !pickerHidden })
+        this.setState({ pickerVisible: !pickerVisible })
     }
 
     showPicker() {
+        if (this._isModalPicker) {
+            this._showModalPicker();
+            return
+        }
+
+        this._showPickerAndroid();
+    }
+
+    // Utility
+    _hideModalPicker() {
+        // If not a modal picker, return
+        if (!this._isModalPicker) { return }
+
+        const { pickerVisible } = this.state;
+        if (!pickerVisible) { return }
+
         if (this._isIOS) {
-            this._showPickerIOS()
+            Animated.timing(
+                this._pickerTranslation,
+                {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                }
+            ).start(() => {
+                this.setState({pickerVisible: false});
+            })
         } else {
-            this._showPickerAndroid()
+            this.setState({pickerVisible: false})
         }
     }
 
-    // Android picker is a dialog that only dismisses itself
-    hidePicker() {
-        if (!this._isIOS) { return }
+    _showModalPicker() {
+        const { pickerVisible } = this.state;
+        if (pickerVisible === true) { return }
+        this.setState({ pickerVisible: true });
 
-        const { pickerHidden } = this.state;
-        if (pickerHidden === true) { return }
-        this.setState({ pickerHidden: true });
-
-        Animated.timing(
-            this._pickerTranslation,
-            {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-                easing: Easing.quad
-            }
-        ).start()
-    }
-
-    // UTILITY
-    _showPickerIOS() {
-        const { pickerHidden } = this.state;
-        if (pickerHidden === false) { return }
-        this.setState({ pickerHidden: false });
-
-        Animated.timing(this._pickerTranslation,
-            {
-                toValue: 1,
-                duration: 400,
-                useNativeDriver: true,
-            }
-        ).start()
+        if (this._isIOS) {
+            Animated.timing(this._pickerTranslation,
+                {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: true,
+                }
+            ).start()
+        }
     }
 
     _showPickerAndroid() {
@@ -196,16 +251,18 @@ export default class ModalPicker extends Component {
         }
     }
 
-    async _showDatePickerAndroid() {
+    // Android date/time pickers
+    async _showDatePickerAndroid(): null {
         try {
             const { action, year, month, day } = await DatePickerAndroid.open({
                 mode: "default",
-                date: this.props.initialValue
+                date: this.state.initialValue
             });
 
             if (action !== DatePickerAndroid.dismissedAction) {
                 const chosenDate = new Date(year, month, day);
                 this.props.onValueChange(chosenDate);
+                this.setState({initialValue: chosenDate})
             }
         }
         catch({ code, message }) {
@@ -213,9 +270,9 @@ export default class ModalPicker extends Component {
         }
     }
 
-    async _showTimePickerAndroid() {
+    async _showTimePickerAndroid(): null {
         try {
-            const now = this.props.initialValue;
+            const now = this.state.initialValue;
             const { action, hour, minute } = await TimePickerAndroid.open({
                 hour: now.getHours(),
                 minute: now.getMinutes(),
@@ -225,6 +282,7 @@ export default class ModalPicker extends Component {
             if (action !== TimePickerAndroid.dismissedAction) {
                 const chosenDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
                 this.props.onValueChange(chosenDate);
+                this.setState({initialValue: chosenDate})
             }
         }
         catch ({ code, message }) {
@@ -232,9 +290,9 @@ export default class ModalPicker extends Component {
         }
     }
 
-    async _showDateTimePickerAndroid() {
+    async _showDateTimePickerAndroid(): null {
         try {
-            const now = this.props.initialValue;
+            const now = this.state.initialValue;
             const dateResults = await DatePickerAndroid.open({
                 mode: "default",
                 date: now
@@ -254,7 +312,8 @@ export default class ModalPicker extends Component {
             const { hour, minute } = timeResults;
             const chosenDate = new Date(year, month, day, hour, minute);
 
-            this.props.onValueChange(chosenDate)
+            this.props.onValueChange(chosenDate);
+            this.setState({initialValue: chosenDate})
         }
         catch ({ code, message }) {
             console.warn(`${code}: Cannot open date/time picker ${message}`)
@@ -268,37 +327,70 @@ ModalPicker.propTypes = {
 
     initialValue: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.date
+        PropTypes.instanceOf(Date)
     ]),
     style: PropTypes.object,
 
+    // For the picker
+    pickerItems: PropTypes.arrayOf(PropTypes.string),
+
     onValueChange: PropTypes.func,
 
-    // IOS title & header
+    // ANDROID ONLY
+    androidPickerCellStyle: PropTypes.object,
+    androidPickerCellTextStyle: PropTypes.object,
+
+    // IOS ONLY
     headerStyle: PropTypes.object,
     title: PropTypes.string,
     titleStyle: PropTypes.object,
     padding: PropTypes.number,
 
     // For the date/time/datetime
-    maximumDate: PropTypes.date,
-    minimumDate: PropTypes.date,
+    maximumDate: PropTypes.instanceOf(Date),
+    minimumDate: PropTypes.instanceOf(Date),
     minuteInterval: PropTypes.oneOf(["1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30"]),
     timeZoneOffsetInMinutes: PropTypes.number,
     locale: PropTypes.string,
-
-    // For the picker
-    pickerItems: PropTypes.arrayOf(PropTypes.string)
 };
 
 const styles = StyleSheet.create({
+    modalOverlay: {
+        backgroundColor: "black",
+        opacity: 0.5,
+        height: "100%",
+        width: "100%",
+        position: "absolute",
+        zIndex: -1
+    },
     picker: {
-        width: "100%"
+        width: "100%",
+        backgroundColor: "white"
     },
     pickerHeader: {
         height: 40,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#CBD0D6",
+        backgroundColor: "#EFEFF4"
+    },
+    regPickerAndroid: {
+        width: "100%",
+        marginTop: 150,
+    },
+    androidPickerCell: {
+        backgroundColor: "white",
+        borderBottomWidth: 1,
+        borderColor: "#EFEFEF",
+        marginHorizontal: 50,
+        height: 45,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    androidPickerCellText: {
+        fontSize: 15,
+        color: "black"
     }
 });

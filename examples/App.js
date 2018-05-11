@@ -27,10 +27,10 @@ export default class App extends Component<undefined> {
         return (
             <View>
                 <View style={styles.buttonContainer}>
-                    <Button style={styles.button} title={regValue} onPress={() => this._showPicker(this._regPicker)}/>
-                    <Button style={styles.button} title={this._datestring(dateValue)} onPress={() => this._showPicker(this._datePicker)}/>
-                    <Button style={styles.button} title={this._datestring(timeValue)} onPress={() => this._showPicker(this._timePicker)}/>
-                    <Button style={styles.button} title={this._datestring(datetimeValue)} onPress={() => this._showPicker(this._datetimePicker)}/>
+                    <Button title={regValue} onPress={() => this._showPicker(this._regPicker)}/>
+                    <Button title={this._dateString(dateValue)} onPress={() => this._showPicker(this._datePicker)}/>
+                    <Button title={this._timeString(timeValue)} onPress={() => this._showPicker(this._timePicker)}/>
+                    <Button title={this._dateTimeString(datetimeValue)} onPress={() => this._showPicker(this._datetimePicker)}/>
                 </View>
                 <Picker
                     type={"picker"}
@@ -63,11 +63,6 @@ export default class App extends Component<undefined> {
                     onValueChange={(val) => {
                         this.setState({timeValue: val});
                     }}
-                    style={{
-                        borderTopWidth: 0.5,
-                        borderColor: "#707070"
-                    }}
-                    padding={-40}
                 />
                 <Picker
                     type={"datetime"}
@@ -82,21 +77,23 @@ export default class App extends Component<undefined> {
         );
     }
 
-    _hidePickers() {
-        this._regPicker.hidePicker();
-        this._datePicker.hidePicker();
-        this._timePicker.hidePicker();
-        this._datetimePicker.hidePicker();
-    }
-
     _showPicker(picker) {
-        this._hidePickers();
         picker.showPicker()
     }
 
-    _datestring(date) {
+    _timeString(date) {
         let minutes = date.getMinutes() + '';
-        minutes = minutes.length == 2 ? minutes : new Array(2 - minutes.length + 1).join('0') + minutes;
+        minutes = minutes.length === 2 ? minutes : new Array(2 - minutes.length + 1).join('0') + minutes;
+        return `${date.getHours()}:${date.getMinutes()}`
+    }
+
+    _dateString(date) {
+        return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+    }
+
+    _dateTimeString(date) {
+        let minutes = date.getMinutes() + '';
+        minutes = minutes.length === 2 ? minutes : new Array(2 - minutes.length + 1).join('0') + minutes;
         return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}, ${date.getHours()}:${minutes}`
     }
 
@@ -107,8 +104,6 @@ const styles = StyleSheet.create({
         marginVertical: 50,
         justifyContent: "space-between",
         alignItems: "center",
-    },
-    button: {
-        marginBottom: 10
+        height: 200
     }
 });

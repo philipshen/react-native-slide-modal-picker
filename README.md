@@ -3,11 +3,7 @@
 
 A nice little wrapper for pickers. On iOS, they slide up from the bottom, and on Android the dialogs appear like normal. Only needs one implementation. Should save you some trouble.
 
-On Android these only work for date/time/datetime pickers right now, and not the regular ol' pickers. I might try to figure that out later, but seeing as how it's super easy to just implement the regular picker on Android––much easier than to implement it into this package, anyways––don't count on it.
-
-I'm not going to spend much (read: any, unless there's an issue or something) time on this––I made it for personal use and (based on a few Google searches) decided publishing it would fill a hole––so it might be safer for you to just go into the source code and copy and paste it into your project rather than adding the npm package. It's some 200 lines of code, pretty simple. With that said, here's how to use it.
-
-Also, I'm well aware that the name kinda blows.
+Here's a link to the Github, you can look through files and stuff there: [https://github.com/philipshen/react-native-slide-modal-picker](https://github.com/philipshen/react-native-slide-modal-picker)
 
 ## Usage
 
@@ -62,6 +58,11 @@ Then just go ahead and use it like so. Here's an example of a date and time pick
     
 That's all you need to implement it.
 
+Here are some gifs so you get a feel for what it's like. It's the same code here for both iOS and Android; you can find it on Github here [(link)](https://github.com/philipshen/react-native-slide-modal-picker/blob/master/examples/App.js). It's highly customizable, so don't mind the ugliness. You can observe the default styles in the time picker (iOS) or anywhere (Android).
+
+![Gif of iOS demo](https://imgur.com/gallery/4IfwZcb)
+![Gif of android demo](https://imgur.com/gallery/3eLzH17)
+
 ### Props
 
 **type**: `"time"|"date"|"datetime"|picker` 
@@ -78,25 +79,25 @@ By default, either the first item in `pickerItems` or the current date (dependin
 
 **onValueChange**: `(val) => void` <br />When a new date is selected.
 
-**padding**: `number` 
-<br /> 
-By default, the iOS date picker's top margin is equal to the height of the screen. In many cases, however, its superview will not be the size of the entire screen; in these cases, this prop can be set to "push" the picker a little higher. For example, if you have a react-navigation header:
+#### Android only
+**androidPickerCellStyle**: `object`
 <br />
+The style of the individual cell of the regular Android picker
 
-    import { Header } from 'react-navigation'
-    import Picker from 'react-native-slide-modal-picker'
-    ...
-    <Picker
-        ...
-        padding={Header.HEIGHT}
-    >
+**androidPickerCellTextStyle**: `object`
+<br />
+The style of the text in the cells of the regular Android picker
 
-#### IOS Only
+#### IOS only
 **style**: `object` <br />Style of the actual picker
 
 **title**: `string`
 
 **titleStyle**: `object`
+
+**padding**: `number` 
+<br /> 
+Just in case for whatever reason the modal' position isn't right (it should have a marginTop equal to the height of the screen), you can use this to change the padding.
 
 #### The following are all the same as [DatePickerIOS](https://facebook.github.io/react-native/docs/datepickerios.html):
 

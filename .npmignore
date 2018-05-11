@@ -67,3 +67,5 @@ app.json
 yarn.lock
 index.js
 .buckconfig
+
+readme_media
