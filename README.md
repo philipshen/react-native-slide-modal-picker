@@ -60,8 +60,8 @@ That's all you need to implement it.
 
 Here are some gifs so you get a feel for what it's like. It's the same code here for both iOS and Android; you can find it on Github here [(link)](https://github.com/philipshen/react-native-slide-modal-picker/blob/master/examples/App.js). It's highly customizable, so don't mind the ugliness. You can observe the default styles in the time picker (iOS) or anywhere (Android).
 
-![Gif of iOS demo](./readme_media/ios_demo.gif)
-![Gif of android demo](./readme_media/android_demo.gif)
+![Gif of iOS demo](./readme_media/ios_demo.gif =200x300)
+![Gif of android demo](./readme_media/android_demo.gif =200x300)
 
 ### Props
 
@@ -79,7 +79,7 @@ By default, either the first item in `pickerItems` or the current date (dependin
 
 **onValueChange**: `(val) => void` <br />When a new date is selected.
 
-#### Android only
+#### __Android only__
 **androidPickerCellStyle**: `object`
 <br />
 The style of the individual cell of the regular Android picker
@@ -88,7 +88,7 @@ The style of the individual cell of the regular Android picker
 <br />
 The style of the text in the cells of the regular Android picker
 
-#### IOS only
+#### __IOS only__
 **style**: `object` <br />Style of the actual picker
 
 **title**: `string`
