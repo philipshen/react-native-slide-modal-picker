@@ -69,6 +69,7 @@ Here are some gifs so you get a feel for what it's like. It's the same code here
 </a>
 <br />
 
+
 ### Props
 
 **type**: `"time"|"date"|"datetime"|picker` 
@@ -85,7 +86,7 @@ By default, either the first item in `pickerItems` or the current date (dependin
 
 **onValueChange**: `(val) => void` <br />When a new date is selected.
 
-#### __Android only__
+####  - Android only
 **androidPickerCellStyle**: `object`
 <br />
 The style of the individual cell of the regular Android picker
@@ -94,7 +95,7 @@ The style of the individual cell of the regular Android picker
 <br />
 The style of the text in the cells of the regular Android picker
 
-#### __IOS only__
+####  - IOS only
 **style**: `object` <br />Style of the actual picker
 
 **title**: `string`
