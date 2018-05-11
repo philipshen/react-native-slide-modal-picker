@@ -60,11 +60,12 @@ That's all you need to implement it.
 
 Here are some gifs so you get a feel for what it's like. It's the same code here for both iOS and Android; you can find it on Github here [(link)](https://github.com/philipshen/react-native-slide-modal-picker/blob/master/examples/App.js). It's highly customizable, so don't mind the ugliness. You can observe the default styles in the time picker (iOS) or anywhere (Android).
 
-![Gif of iOS demo](./readme_media/ios_demo.gif)
 <a href="#">
-    <img src="./readme_media/ios_demo.gif" align="left" width="200" height="300" >
+    <img alt="Gif of iOS demo" src="./readme_media/ios_demo.gif" align="left" width="350" height="400" >
 </a>
-![Gif of android demo](./readme_media/android_demo.gif)
+<a href="#">
+    <img alt="Gif of android demo" src="./readme_media/android_demo.gif" align="left" width="350" height="400" >
+</a>
 
 ### Props
 
