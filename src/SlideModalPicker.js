@@ -20,8 +20,8 @@ export default class ModalPicker extends Component {
         this._isModalPicker = this._isIOS || props.type === "picker";
 
         // Initial value
-        let initialValue;
-        if (props.initialValue === undefined) {
+        let initialValue = props.initialValue;
+        if (initialValue == null) {
             if (props.type === "picker") {
                 initialValue = props.pickerItems[0];
             } else {

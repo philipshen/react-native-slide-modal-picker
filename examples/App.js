@@ -37,6 +37,7 @@ export default class App extends Component<undefined> {
                     ref={ref => (this._regPicker = ref)}
                     pickerItems={["给我钱", "牛肉饭", "孔夫子说"]}
                     pickerValue={this.state.regValue}
+                    initialValue={"孔夫子说"}
                     onValueChange={(val) => {
                         this.setState({regValue: val});
                     }}
@@ -46,6 +47,7 @@ export default class App extends Component<undefined> {
                     type={"date"}
                     ref={ref => (this._datePicker = ref)}
                     pickerValue={this.state.dateValue}
+                    initialValue={new Date(2000, 3, 12)}
                     onValueChange={(val) => {
                         this.setState({dateValue: val});
                     }}

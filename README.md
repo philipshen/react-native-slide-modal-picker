@@ -7,6 +7,8 @@ Here's a link to the Github, you can look through files and stuff there: [https:
 
 ## Usage
 
+*Note: When testing the parent component in enzyme, refer to this as "ModalPicker" (e.g. `wrapper.find('ModalPicker')`)*
+
 ### Example
 Like always, do `yarn add react-native-slide-modal-picker` or `npm install react-native-slide-modal-picker --save`
 
