@@ -120,7 +120,7 @@ export default class ModalPicker extends Component {
             >
                 <View style={[styles.pickerHeader, this.props.headerStyle]}>
                     <Button
-                        title={"Cancel"}
+                        title={this.props.cancelText || "Cancel"}
                         onPress={() => {
                             this._hideModalPicker();
                             // Reset the current value
@@ -129,7 +129,7 @@ export default class ModalPicker extends Component {
                     />
                     <Text style={this.props.titleStyle}>{this.props.title}</Text>
                     <Button
-                        title={"Done"}
+                        title={this.props.doneText || "Done"}
                         onPress={() => {
                             this._hideModalPicker();
                             // Set the initial value to the selected value
@@ -344,6 +344,8 @@ ModalPicker.propTypes = {
     headerStyle: PropTypes.object,
     title: PropTypes.string,
     titleStyle: PropTypes.object,
+    cancelText: PropTypes.string,
+    doneText: PropTypes.string,
     padding: PropTypes.number,
 
     // For the date/time/datetime
